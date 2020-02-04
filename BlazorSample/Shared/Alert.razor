@@ -1,0 +1,31 @@
+﻿<div class="alert @AlertClasses[Type]">
+    @Text
+</div>
+
+@code {
+    public enum AlertType
+    {
+        Info,
+        Success,
+        Danger
+    }
+
+    public Dictionary<AlertType, string> AlertClasses
+    {
+        get
+        {
+            return new Dictionary<AlertType, string>()
+            {
+                { AlertType.Info, "alert-info" },
+                { AlertType.Success, "alert-success" },
+                { AlertType.Danger, "alert-danger" }
+            };
+        }
+    }
+
+    [Parameter]
+    public AlertType Type { get; set; } = AlertType.Info;
+
+    [Parameter]
+    public string Text { get; set; }
+}

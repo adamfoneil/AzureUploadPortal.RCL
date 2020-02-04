@@ -1,0 +1,8 @@
+﻿@inherits ToggleThemeAlertBase
+
+<div class="alert alert-@Theme">
+    <label>
+        @ChildContent
+        <input type="checkbox" @bind="IsDark"/>
+    </label>    
+</div>
