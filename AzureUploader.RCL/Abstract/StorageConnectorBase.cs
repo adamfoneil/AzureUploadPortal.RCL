@@ -59,7 +59,7 @@ namespace AzureUploader.RCL.Abstract
         /// <summary>
         /// copies a blob from the upload area to a destination
         /// </summary>
-        public async Task ProcessBlob(string blobUri)
+        public async Task ProcessBlobAsync(string blobUri)
         {
             var sourceBlob = new CloudBlockBlob(new Uri(blobUri), _creds);
             if (!(await sourceBlob.ExistsAsync())) throw new Exception($"Blob not found: {blobUri}");
