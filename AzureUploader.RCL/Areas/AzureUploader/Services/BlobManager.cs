@@ -8,13 +8,13 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
-namespace AzureUploader.Controllers
-{    
-    public abstract class BlobController : Controller
+namespace AzureUploader.RCL.Areas.AzureUploader.Services
+{
+    public abstract class BlobManager
     {
         protected readonly StorageCredentials StorageCredentials;
 
-        public BlobController(StorageCredentials storageCredentials)
+        public BlobManager(StorageCredentials storageCredentials)
         {
             StorageCredentials = storageCredentials;
         }
@@ -25,7 +25,7 @@ namespace AzureUploader.Controllers
 
         protected virtual Task OnBlobUploaded(IPrincipal user, CloudBlockBlob blob) => Task.CompletedTask;
 
-        protected string GetUserFolderName() => (User.Identity.IsAuthenticated) ? User.Identity.Name : "anonUser";
+        protected string GetUserFolderName(IPrincipal user) => (user.Identity.IsAuthenticated) ? user.Identity.Name : "anonUser";
 
         protected async Task<CloudBlobContainer> GetContainerInternalAsync(string containerName)
         {
@@ -34,43 +34,42 @@ namespace AzureUploader.Controllers
             var container = client.GetContainerReference(containerName);
             await container.CreateIfNotExistsAsync();
             return container;
-        }        
+        }
 
-        [HttpPost]        
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> UploadAsync(HttpRequest request, IPrincipal user)
         {
             var container = await GetContainerAsync();
 
-            foreach (var file in Request.Form.Files)
+            foreach (var file in request.Form.Files)
             {
                 using (var stream = file.OpenReadStream())
                 {
                     string blobName = GetBlobName(file);
                     var blob = container.GetBlockBlobReference(blobName);
                     blob.Properties.ContentType = file.ContentType;
-                    await blob.UploadFromStreamAsync(stream);                    
-                    await OnBlobUploaded(User, blob);
+                    await blob.UploadFromStreamAsync(stream);
+                    await OnBlobUploaded(user, blob);
                 }
-            }            
+            }
 
-            return Ok();
+            return new OkResult();
         }
 
-        public async Task<PartialViewResult> MyUploads()
+        public async Task<IEnumerable<CloudBlockBlob>> GetMyBlobsAsync(IPrincipal user)
         {
             var container = await GetContainerAsync();
 
             List<CloudBlockBlob> results = new List<CloudBlockBlob>();
             var token = default(BlobContinuationToken);
-            var dir = container.GetDirectoryReference(GetUserFolderName());
+            var dir = container.GetDirectoryReference(GetUserFolderName(user));
             do
             {
                 var segment = await dir.ListBlobsSegmentedAsync(true, BlobListingDetails.All, null, token, null, null);
                 results.AddRange(segment.Results.OfType<CloudBlockBlob>());
-                token = segment.ContinuationToken;                
+                token = segment.ContinuationToken;
             } while (token != null);
 
-            return PartialView(results);
+            return results;
         }
     }
 }

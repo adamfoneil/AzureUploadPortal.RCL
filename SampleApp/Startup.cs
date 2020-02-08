@@ -12,6 +12,8 @@ using SampleApp.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AzureUploader.RCL.Areas.AzureUploader.Services;
+using SampleApp.Services;
 
 namespace SampleApp
 {
@@ -34,6 +36,7 @@ namespace SampleApp
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddControllers();
+            services.AddTransient(typeof(BlobManager), typeof(MyBlobManager));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
