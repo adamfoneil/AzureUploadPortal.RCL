@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <PackageId>AO.AzureUploader.RCL</PackageId>
+    <Authors>Adam O'Neil</Authors>
+    <Product>AzureUploader.RCL</Product>
   </PropertyGroup>
 
   <ItemGroup>

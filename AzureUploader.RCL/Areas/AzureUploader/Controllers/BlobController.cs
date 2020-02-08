@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace AzureUploader.Controllers
-{
+{    
     public abstract class BlobController : Controller
     {
         protected readonly StorageCredentials StorageCredentials;
@@ -24,6 +25,8 @@ namespace AzureUploader.Controllers
 
         protected virtual Task OnBlobUploaded(IPrincipal user, CloudBlockBlob blob) => Task.CompletedTask;
 
+        protected string GetUserFolderName() => (User.Identity.IsAuthenticated) ? User.Identity.Name : "anonUser";
+
         protected async Task<CloudBlobContainer> GetContainerInternalAsync(string containerName)
         {
             var account = new CloudStorageAccount(StorageCredentials, true);
@@ -31,7 +34,7 @@ namespace AzureUploader.Controllers
             var container = client.GetContainerReference(containerName);
             await container.CreateIfNotExistsAsync();
             return container;
-        }
+        }        
 
         [HttpPost]        
         public async Task<IActionResult> Upload()
@@ -53,12 +56,26 @@ namespace AzureUploader.Controllers
             return Ok();
         }
 
-        public async Task<PartialViewResult> ListMyBlobs()
+        public async Task<PartialViewResult> MyUploads()
         {
             var container = await GetContainerAsync();
-            //var blobs = await container.
 
-            throw new NotImplementedException();
+            List<CloudBlockBlob> results = new List<CloudBlockBlob>();
+            var token = default(BlobContinuationToken);
+            var dir = container.GetDirectoryReference(GetUserFolderName());
+            do
+            {
+                var segment = await dir.ListBlobsSegmentedAsync(true, BlobListingDetails.All, null, token, null, null);
+                results.AddRange(segment.Results.OfType<CloudBlockBlob>());
+                token = segment.ContinuationToken;                
+            } while (token != null);
+
+            return PartialView(results);
+        }
+
+        public ViewResult Test()
+        {
+            return View();
         }
     }
 }

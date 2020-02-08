@@ -17,7 +17,7 @@ namespace SampleApp.Controllers
 
         protected override string GetBlobName(IFormFile file)
         {
-            string userName = (User.Identity.IsAuthenticated) ? User.Identity.Name : "anonUser";
+            string userName = GetUserFolderName();
             return Path.Combine(userName, file.FileName);
         }               
     }
