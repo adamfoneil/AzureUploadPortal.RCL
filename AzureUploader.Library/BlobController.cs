@@ -44,7 +44,8 @@ namespace AzureUploader.Library
                 {
                     string blobName = GetBlobName(file);
                     var blob = container.GetBlockBlobReference(blobName);
-                    await blob.UploadFromStreamAsync(stream);
+                    blob.Properties.ContentType = file.ContentType;
+                    await blob.UploadFromStreamAsync(stream);                    
                     await OnBlobUploaded(User, blob);
                 }
             }            
