@@ -7,8 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 namespace SampleApp.Controllers
-{
-    [Authorize]
+{    
     public class BlobController : AzureUploader.Library.BlobController
     {        
         public BlobController(IConfiguration config) : base(new StorageCredentials(config["StorageAccount:Name"], config["StorageAccount:Key"]))
