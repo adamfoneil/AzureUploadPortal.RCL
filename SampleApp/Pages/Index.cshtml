@@ -15,14 +15,7 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
-@if (User.Identity.IsAuthenticated)
-{
-    <form action="/Blob/Upload" class="dropzone" id="uploader"></form>
-}
-else
-{
-    <p>Please login to upload files.</p>
-}
+<form action="/Blob/Upload" class="dropzone" id="uploader"></form>
 
 @section Scripts {
     <script 
