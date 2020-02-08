@@ -18,7 +18,7 @@ namespace SampleApp.Controllers
         protected override async Task<CloudBlobContainer> GetContainerAsync() => await GetContainerInternalAsync("sample-uploads");
 
         protected override string GetBlobName(IFormFile file)
-        {
+        {            
             return Path.Combine(User.Identity.Name, file.FileName);
         }               
     }
