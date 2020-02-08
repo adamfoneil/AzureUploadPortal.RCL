@@ -36,7 +36,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             return container;
         }
 
-        public async Task<IActionResult> UploadAsync(HttpRequest request, IPrincipal user)
+        public async Task UploadAsync(HttpRequest request, IPrincipal user)
         {
             var container = await GetContainerAsync();
 
@@ -51,8 +51,6 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
                     await OnBlobUploaded(user, blob);
                 }
             }
-
-            return new OkResult();
         }
 
         public async Task<IEnumerable<CloudBlockBlob>> GetMyBlobsAsync(IPrincipal user)
