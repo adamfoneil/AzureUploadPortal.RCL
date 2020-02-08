@@ -4,7 +4,28 @@
     ViewData["Title"] = "Home page";
 }
 
+@section head {
+    <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" 
+        integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
+}
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <form action="/Blob/Upload" class="dropzone"></form>
+}
+else
+{
+    <p>Please login to upload files.</p>
+}
+
+@section Scripts {
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone-amd-module.min.js" 
+        integrity="sha256-resMHNTFeF3aRsPgzKyH1bIwSmB4dUlHGTE5nfldZLI=" crossorigin="anonymous"></script>
+}
