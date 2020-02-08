@@ -21,7 +21,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         protected abstract Task<CloudBlobContainer> GetContainerAsync();
 
-        protected virtual string GetBlobName(IFormFile file) => file.FileName;
+        protected virtual string GetBlobName(IPrincipal user, IFormFile file) => file.FileName;
 
         protected virtual Task OnBlobUploaded(IPrincipal user, CloudBlockBlob blob) => Task.CompletedTask;
 
@@ -44,7 +44,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    string blobName = GetBlobName(file);
+                    string blobName = GetBlobName(user, file);
                     var blob = container.GetBlockBlobReference(blobName);
                     blob.Properties.ContentType = file.ContentType;
                     await blob.UploadFromStreamAsync(stream);

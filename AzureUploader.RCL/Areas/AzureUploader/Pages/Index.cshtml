@@ -7,10 +7,11 @@
         integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
 }
 
-
 <p>My Uploads</p>
 
-<form action="/AzureUploader/Index" class="dropzone" id="uploader"></form>
+<form class="dropzone" id="uploader" action="/AzureUploader/Index" method="post">
+    @Html.AntiForgeryToken()
+</form>
 
 <ul>
     @foreach (var item in Model.MyBlobs)
@@ -24,15 +25,4 @@
     <script 
         src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone-amd-module.min.js" 
         integrity="sha256-resMHNTFeF3aRsPgzKyH1bIwSmB4dUlHGTE5nfldZLI=" crossorigin="anonymous"></script>
-    <script type="text/javascript">     
-        Dropzone.autoDiscover = false;
-        $(function () {
-            var myDropzone = new Dropzone("#uploader");
-            myDropzone.on("sending", function(file, xhr, data) {
-                if (file.fullPath) {
-                    data.append(file.fullPath);
-                }
-            });
-        })
-    </script>
 }
