@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
@@ -7,8 +6,8 @@ using System.IO;
 using System.Threading.Tasks;
 
 namespace SampleApp.Controllers
-{    
-    public class BlobController : AzureUploader.Library.BlobController
+{
+    public class BlobController : AzureUploader.Controllers.BlobController
     {        
         public BlobController(IConfiguration config) : base(new StorageCredentials(config["StorageAccount:Name"], config["StorageAccount:Key"]))
         {

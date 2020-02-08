@@ -18,7 +18,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\AzureUploader.Library\AzureUploader.Library.csproj" />
+    <ProjectReference Include="..\AzureUploader.RCL\AzureUploader.RCL.csproj" />
   </ItemGroup>
 
 </Project>
