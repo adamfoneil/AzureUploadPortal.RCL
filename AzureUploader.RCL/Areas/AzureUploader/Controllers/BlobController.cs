@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
+using System;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
@@ -50,6 +51,14 @@ namespace AzureUploader.Controllers
             }            
 
             return Ok();
+        }
+
+        public async Task<PartialViewResult> ListMyBlobs()
+        {
+            var container = await GetContainerAsync();
+            //var blobs = await container.
+
+            throw new NotImplementedException();
         }
     }
 }
