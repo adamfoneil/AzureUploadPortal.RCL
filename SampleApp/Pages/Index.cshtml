@@ -28,7 +28,8 @@ else
     <script 
         src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone-amd-module.min.js" 
         integrity="sha256-resMHNTFeF3aRsPgzKyH1bIwSmB4dUlHGTE5nfldZLI=" crossorigin="anonymous"></script>
-    <script>        
+    <script type="text/javascript">     
+        Dropzone.autoDiscover = false;
         $(function () {
             var myDropzone = new Dropzone("#uploader");
             myDropzone.on("sending", function(file, xhr, data) {
@@ -36,6 +37,6 @@ else
                     data.append(file.fullPath);
                 }
             });
-        });        
+        })
     </script>
 }
