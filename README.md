@@ -68,7 +68,7 @@ protected override async Task<int> LogSubmitStartedAsync(SubmittedBlob submitted
 
 - Again, as part of the logging process, we have to implement [LogSubmitDoneAsync](https://github.com/adamosoftware/AzureUploadPortal.RCL/blob/master/SampleApp/Services/MyBlobManager.cs#L39). This records either a successful submission or an error message on a given log Id. The sample app uses [Dapper.CX](https://github.com/adamosoftware/Dapper.CX) to perform the CRUD update.
 
-```chsarp
+```csharp
 protected override async Task LogSubmitDoneAsync(int id, bool successful, string message = null)
 {
     using (var cn = GetConnection())
@@ -84,7 +84,7 @@ protected override async Task LogSubmitDoneAsync(int id, bool successful, string
 
 - The final piece of the logging functionality is being able to query upload history by user, returning paginated results. This is done with [QuerySubmittedBlobsAsync](https://github.com/adamosoftware/AzureUploadPortal.RCL/blob/master/SampleApp/Services/MyBlobManager.cs#L59). The sample app uses [Dapper.QX](https://github.com/adamosoftware/Dapper.QX). The query class example is [here](https://github.com/adamosoftware/AzureUploadPortal.RCL/blob/master/SampleApp/Queries/MySubmittedBlobs.cs). Note that my example doesn't actually use the `pageSize` argument. There is a hard-coded page size of 30 rows in the query class itself. That's kind of a bug; I might remove the `pageSize` argument from the [abstract method](https://github.com/adamosoftware/AzureUploadPortal.RCL/blob/master/AzureUploader.RCL/Areas/UploadPortal/Services/BlobManager.cs#L40).
 
-```chsarp
+```csharp
 protected override async Task<IEnumerable<SubmittedBlob>> QuerySubmittedBlobsAsync(string userName, int pageSize = 30, int page = 0)
 {
     using (var cn = GetConnection())
