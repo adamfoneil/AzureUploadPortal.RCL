@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <PackageId>AO.AzureUploader.RCL</PackageId>
+    <PackageId>AO.AzureUploadPortal.RCL</PackageId>
     <Authors>Adam O'Neil</Authors>
-    <Product>AzureUploader.RCL</Product>
+    <Product>AO.AzureUploadPortal.RCL</Product>
+    <Description>Allow users to upload to Azure blob storage and track upload history with this Razor Class Library</Description>
+    <Copyright>Copyright (c) 2020 Adam O'Neil</Copyright>
+    <PackageProjectUrl>https://github.com/adamosoftware/AzureUploadPortal.RCL</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adamosoftware/AzureUploadPortal.RCL</RepositoryUrl>
+    <PackageTags>razor-class-library azure-blob-storage</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
