@@ -1,5 +1,6 @@
 ﻿@page
 @model AzureUploader.RCL.Areas.AzureUploader.Pages.IndexModel
+@using Humanizer
 
 @section head {
     <link rel="stylesheet" 
@@ -7,20 +8,18 @@
         integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
 }
 
-<form class="dropzone" id="uploader" action="/AzureUploader/Index" method="post">
+<form class="dropzone" id="uploader" action="/UploadPortal/Index" method="post">
     @Html.AntiForgeryToken()
 </form>
 
 <h2>My Uploads</h2>
+<p>These files haven't been submitted yet.</p>
 <ul>
     @foreach (var item in Model.MyUploads)
     {
         <li>
-            <span>@item.Name</span>
-            <form method="post" asp-page-handler="Submit" class="form-inline">
-                <input type="hidden" name="uri" value="@item.Uri.AbsoluteUri"/>
-                <button type="submit" class="btn btn-secondary btn-sm">Submit</button>
-            </form>
+            <span><a href="@Model.GetDownloadUrl(item.Uri.AbsoluteUri)">@Model.TrimUserName(item.Name)</a></span>
+            <span class="text-muted small">@item.Properties.Length, @item.Properties.LastModified</span>
         </li>
     }
 </ul>
@@ -32,12 +31,14 @@
     </form>
 }
 
+<hr/>
+
 <h2>Upload History</h2>
 <ul>
     @foreach (var item in Model.SubmittedBlobs)
     {
         <li>
-            <span>@item.Path</span>
+            <span>@Model.TrimUserName(item.Path)</span>
             <span>@item.LocalTime</span>
         </li>
     }

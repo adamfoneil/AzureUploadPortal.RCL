@@ -117,7 +117,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 Timestamp = DateTime.UtcNow,
                 UserName = userName,
-                Path = blob.Name,
+                Path = TrimUserName(userName, blob.Name),
                 Length = blob.Properties.Length,
                 IsOverwrite = exists
             });
@@ -137,12 +137,10 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 await LogSubmitDoneAsync(logId, false, exc.Message);
             }
-
         }
 
         public async Task SubmitBlobAsync(string blobUri)
-        {
-            // verify we have the source blob
+        {          
             var sourceUri = new Uri(blobUri);
             var sourceBlob = new CloudBlockBlob(sourceUri, StorageCredentials);
             await SubmitBlobAsync(sourceBlob);
@@ -167,6 +165,26 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
         {
             string userName = GetUserFolderName(user);
             return await QuerySubmittedBlobsAsync(userName, pageSize, page);
+        }
+
+        public string TrimUserName(string userName, string path)
+        {
+            var nameParts = path.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            return (nameParts.First().Equals(userName)) ?
+                string.Join('/', nameParts.Skip(1)) :
+                string.Join('/', nameParts);
+        }
+
+        public string GetDownloadUrl(string blobUri)
+        {
+            var blob = new CloudBlockBlob(new Uri(blobUri), StorageCredentials);
+            var token = blob.GetSharedAccessSignature(new SharedAccessBlobPolicy()
+            {
+                Permissions = SharedAccessBlobPermissions.Read,
+                SharedAccessExpiryTime = DateTime.UtcNow.Add(TimeSpan.FromHours(1))
+            });
+
+            return blob.Uri.AbsoluteUri + token;
         }
     }
 }

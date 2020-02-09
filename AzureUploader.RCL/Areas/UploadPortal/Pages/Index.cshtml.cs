@@ -20,6 +20,10 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Pages
         public IEnumerable<CloudBlockBlob> MyUploads { get; set; }
         public IEnumerable<SubmittedBlob> SubmittedBlobs { get; set; }
 
+        public string TrimUserName(string path) => _blobManager.TrimUserName(User.Identity.Name, path);
+
+        public string GetDownloadUrl(string blobUri) => _blobManager.GetDownloadUrl(blobUri);
+
         public async Task OnGetAsync()
         {
             MyUploads = await _blobManager.GetMyBlobsAsync(User);
@@ -30,13 +34,6 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Pages
         public async Task<RedirectResult> OnPostAsync()
         {
             await _blobManager.UploadAsync(Request, User);
-            return Redirect("/UploadPortal");
-        }
-
-        [HttpPost]
-        public async Task<RedirectResult> OnPostSubmitAsync([FromForm]string uri)
-        {
-            await _blobManager.SubmitBlobAsync(uri);
             return Redirect("/UploadPortal");
         }
 
