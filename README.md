@@ -2,6 +2,8 @@ Do you need a way for users to upload files to your .NET Core 3 app, and to trac
 
 The benefit of the Razor Class Library approach is that the integration with your app is seamless. There's no additional authentication piece to implement, for example, nothing special to deploy, and no external dependencies apart from your Azure storage account. The abstract class approach this library uses has the benefit of requiring minimal application code, while affording a lot of flexibility in your implementation.
 
+The limitation you have with a Razor Class Library is that you can't very easily override the provided UI. There are CSS classes you can implement, but you can't really affect the markup itself. I can tell you that as of this writing, the page layout is fairly primitive, and will be evolving. Please [reach out to me](mailto:adam@aosoftware.net) if you have requests or ideas for improvement.
+
 ![img](https://adamosoftware.blob.core.windows.net/images/azure-upload-portal-smaller.gif)
 
 This repo contains a [SampleApp](https://github.com/adamosoftware/AzureUploadPortal.RCL/tree/master/SampleApp) showing a minimal implementation. Here's a walktrhough of the key points:
