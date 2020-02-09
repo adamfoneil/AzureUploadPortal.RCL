@@ -29,13 +29,15 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
         protected abstract string UploadContainerName { get; }
 
         /// <summary>
-        /// where do uploads go when "processed"?
+        /// where do uploads go when submitted? This is intended to vary by user, reflecting their tenant association
         /// </summary>
         protected abstract Task<CloudBlobContainer> GetSubmittedContainerAsync(string userName);
 
         protected abstract Task<int> LogSubmitStartedAsync(SubmittedBlob submittedBlob);
 
         protected abstract Task LogSubmitDoneAsync(int id, bool successful, string message = null);
+
+        protected abstract Task<IEnumerable<SubmittedBlob>> QuerySubmittedBlobsAsync(string userName, int pageSize = 30, int page = 0);
 
         protected virtual string GetBlobName(IPrincipal user, IFormFile file) => file.FileName;
 
@@ -148,14 +150,17 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             }
             catch
             {
-                var nameParts = blob.Uri.LocalPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-                return nameParts[1];
+                // this is because early versions weren't writing metadata correctly, and I needed a fallback by inspecting the blob name.
+                // the user name is always the first part of the name
+                var nameParts = blob.Name.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                return nameParts.First();
             }
         }
 
-        public Task<IEnumerable<SubmittedBlob>> GetMySubmittedBlobsAsync(IPrincipal user, int pageSize = 30, int page = 0)
+        public async Task<IEnumerable<SubmittedBlob>> GetMySubmittedBlobsAsync(IPrincipal user, int pageSize = 30, int page = 0)
         {
-            throw new NotImplementedException();
+            string userName = GetUserFolderName(user);
+            return await QuerySubmittedBlobsAsync(userName, pageSize, page);
         }
     }
 }

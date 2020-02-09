@@ -33,7 +33,15 @@
 }
 
 <h2>Upload History</h2>
-
+<ul>
+    @foreach (var item in Model.SubmittedBlobs)
+    {
+        <li>
+            <span>@item.Path</span>
+            <span>@item.LocalTime</span>
+        </li>
+    }
+</ul>
 
 @section Scripts {
     <script 

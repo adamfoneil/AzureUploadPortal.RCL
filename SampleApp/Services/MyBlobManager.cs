@@ -7,6 +7,8 @@ using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using SampleApp.Queries;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -51,6 +53,14 @@ namespace SampleApp.Services
             using (var cn = GetConnection())
             {
                 return await cn.SaveAsync(submittedBlob);
+            }
+        }
+
+        protected override async Task<IEnumerable<SubmittedBlob>> QuerySubmittedBlobsAsync(string userName, int pageSize = 30, int page = 0)
+        {
+            using (var cn = GetConnection())
+            {
+                return await new MySubmittedBlobs() { UserName = userName, Page = page }.ExecuteAsync(cn);
             }
         }
 

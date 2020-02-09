@@ -23,7 +23,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Pages
         public async Task OnGetAsync()
         {
             MyUploads = await _blobManager.GetMyBlobsAsync(User);
-            //SubmittedBlobs = await _blobManager.GetMySubmittedBlobsAsync(User);
+            SubmittedBlobs = await _blobManager.GetMySubmittedBlobsAsync(User);
         }
 
         [HttpPost]

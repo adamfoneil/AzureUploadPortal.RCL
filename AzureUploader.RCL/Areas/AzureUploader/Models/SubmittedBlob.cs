@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AzureUploader.RCL.Areas.AzureUploader.Models
 {
@@ -15,5 +16,8 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Models
         public bool IsOverwrite { get; set; }
         public bool IsSuccessful { get; set; }
         public string ErrorMessage { get; set; }
+
+        [NotMapped]
+        public DateTime LocalTime { get; set; }
     }
 }
