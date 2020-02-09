@@ -13,12 +13,12 @@
 </form>
 
 <h2>My Uploads</h2>
-<p>These files haven't been submitted yet.</p>
-<ul>
+<p>These files have been uploaded but not submitted.</p>
+<ul class="fileList">
     @foreach (var item in Model.MyUploads)
     {
-        <li>
-            <span><a href="@Model.GetDownloadUrl(item.Uri.AbsoluteUri)">@Model.TrimUserName(item.Name)</a></span>
+        <li class="fileItem">
+            <span class="fileName"><a href="@Model.GetDownloadUrl(item.Uri.AbsoluteUri)">@Model.TrimUserName(item.Name)</a></span>
             <span class="text-muted small">@item.Properties.Length, @item.Properties.LastModified</span>
         </li>
     }
@@ -34,11 +34,11 @@
 <hr/>
 
 <h2>Upload History</h2>
-<ul>
+<ul class="fileList">
     @foreach (var item in Model.SubmittedBlobs)
     {
-        <li>
-            <span>@Model.TrimUserName(item.Path)</span>
+        <li class="fileItem">
+            <span class="fileName">@Model.TrimUserName(item.Path)</span>
             <span>@item.LocalTime</span>
         </li>
     }
