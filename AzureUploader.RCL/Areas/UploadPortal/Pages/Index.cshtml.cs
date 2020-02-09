@@ -30,14 +30,22 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Pages
         public async Task<RedirectResult> OnPostAsync()
         {
             await _blobManager.UploadAsync(Request, User);
-            return Redirect("/AzureUploader");
+            return Redirect("/UploadPortal");
         }
 
         [HttpPost]
         public async Task<RedirectResult> OnPostSubmitAsync([FromForm]string uri)
         {
             await _blobManager.SubmitBlobAsync(uri);
-            return Redirect("/AzureUploader");
+            return Redirect("/UploadPortal");
+        }
+
+        [HttpPost]
+        public async Task<RedirectResult> OnPostSubmitAllAsync()
+        {
+            var blobs = await _blobManager.GetMyBlobsAsync(User);
+            foreach (var blob in blobs) await _blobManager.SubmitBlobAsync(blob);
+            return Redirect("/UploadPortal");
         }
     }
 }

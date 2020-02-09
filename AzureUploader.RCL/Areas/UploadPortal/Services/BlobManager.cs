@@ -95,44 +95,41 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             return results;
         }
 
-        public async Task SubmitBlobAsync(string blobUri)
+        public async Task SubmitBlobAsync(CloudBlockBlob blob)
         {
-            // verify we have the source blob
-            var sourceUri = new Uri(blobUri);
-            var sourceBlob = new CloudBlockBlob(sourceUri, StorageCredentials);
-            if (!(await sourceBlob.ExistsAsync())) throw new Exception($"Source blob {blobUri} not found.");
+            if (!(await blob.ExistsAsync())) throw new Exception($"Source blob {blob.Uri.AbsoluteUri} not found.");
 
             // where is it going? this depends on who uploaded it
-            string userName = GetBlobUserName(sourceBlob);
+            string userName = GetBlobUserName(blob);
             var container = await GetSubmittedContainerAsync(userName);
 
             // make sure we're not overwriting the source
-            string destName = sourceBlob.Name;            
+            string destName = blob.Name;
             var destBlob = container.GetBlockBlobReference(destName);
-            destBlob.Properties.ContentType = sourceBlob.Properties.ContentType;
-            if (sourceBlob.Uri.Equals(destBlob.Uri)) throw new InvalidOperationException("Source and destination blobs cannot be the same.");
+            destBlob.Properties.ContentType = blob.Properties.ContentType;
+            if (blob.Uri.Equals(destBlob.Uri)) throw new InvalidOperationException("Source and destination blobs cannot be the same.");
 
             // if the target already exists, it means we have a new, better version of it -- and we want to log that this is an overwrite
             bool exists = await destBlob.ExistsAsync();
             await destBlob.DeleteIfExistsAsync();
-            
+
             int logId = await LogSubmitStartedAsync(new SubmittedBlob()
             {
                 Timestamp = DateTime.UtcNow,
                 UserName = userName,
-                Path = sourceBlob.Name,
-                Length = sourceBlob.Properties.Length,
+                Path = blob.Name,
+                Length = blob.Properties.Length,
                 IsOverwrite = exists
             });
 
             try
             {
-                using (var source = sourceBlob.OpenRead())
+                using (var source = blob.OpenRead())
                 {
                     await destBlob.UploadFromStreamAsync(source);
                 }
 
-                await sourceBlob.DeleteAsync();
+                await blob.DeleteAsync();
 
                 await LogSubmitDoneAsync(logId, true);
             }
@@ -140,6 +137,15 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 await LogSubmitDoneAsync(logId, false, exc.Message);
             }
+
+        }
+
+        public async Task SubmitBlobAsync(string blobUri)
+        {
+            // verify we have the source blob
+            var sourceUri = new Uri(blobUri);
+            var sourceBlob = new CloudBlockBlob(sourceUri, StorageCredentials);
+            await SubmitBlobAsync(sourceBlob);
         }
 
         private string GetBlobUserName(CloudBlockBlob blob)
