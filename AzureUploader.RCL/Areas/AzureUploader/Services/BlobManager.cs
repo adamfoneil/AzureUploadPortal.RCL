@@ -26,16 +26,16 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
         /// <summary>
         /// where do user uploads go? This is the initial destination of all uploads
         /// </summary>
-        protected abstract Task<CloudBlobContainer> GetPortalContainerAsync();
+        protected abstract string UploadContainerName { get; }
 
         /// <summary>
         /// where do uploads go when "processed"?
         /// </summary>
-        protected abstract Task<CloudBlobContainer> GetProcessingContainerAsync(string userName);
+        protected abstract Task<CloudBlobContainer> GetSubmittedContainerAsync(string userName);
 
-        protected abstract Task<int> LogProcessStartedAsync(ProcessedBlob processedBlob);
+        protected abstract Task<int> LogSubmitStartedAsync(SubmittedBlob submittedBlob);
 
-        protected abstract Task LogProcessDoneAsync(int id, bool successful, string message = null);
+        protected abstract Task LogSubmitDoneAsync(int id, bool successful, string message = null);
 
         protected virtual string GetBlobName(IPrincipal user, IFormFile file) => file.FileName;
 
@@ -54,7 +54,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         public async Task UploadAsync(HttpRequest request, IPrincipal user)
         {
-            var container = await GetPortalContainerAsync();
+            var container = await GetContainerInternalAsync(UploadContainerName);
 
             foreach (var file in request.Form.Files)
             {
@@ -75,7 +75,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         public async Task<IEnumerable<CloudBlockBlob>> GetMyBlobsAsync(IPrincipal user)
         {
-            var container = await GetPortalContainerAsync();
+            var container = await GetContainerInternalAsync(UploadContainerName);
 
             List<CloudBlockBlob> results = new List<CloudBlockBlob>();
             var token = default(BlobContinuationToken);
@@ -90,27 +90,33 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             return results;
         }
 
-        public async Task ProcessBlobAsync(string blobUri)
+        public async Task SubmitBlobAsync(string blobUri)
         {
+            // verify we have the source blob
             var sourceUri = new Uri(blobUri);
-            var sourceBlob = new CloudBlockBlob(sourceUri);
+            var sourceBlob = new CloudBlockBlob(sourceUri, StorageCredentials);
             if (!(await sourceBlob.ExistsAsync())) throw new Exception($"Source blob {blobUri} not found.");
 
-            var nameParts = sourceUri.LocalPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-            string userName = nameParts.First();
-            string destName = string.Join('/', nameParts.Skip(1));
-            var container = await GetProcessingContainerAsync(userName);
-            var destBlob = container.GetBlockBlobReference(destName);            
+            // where is it going? this depends on who uploaded it
+            string userName = sourceBlob.Metadata[mdUserName];
+            var container = await GetSubmittedContainerAsync(userName);
 
-            if (await destBlob.ExistsAsync()) throw new Exception($"Destination blob {destBlob.Uri} already exists.");
+            // make sure we're not overwriting the source
+            string destName = sourceUri.LocalPath;            
+            var destBlob = container.GetBlockBlobReference(destName);
             if (sourceBlob.Uri.Equals(destBlob.Uri)) throw new InvalidOperationException("Source and destination blobs cannot be the same.");
 
-            int logId = await LogProcessStartedAsync(new ProcessedBlob()
+            // if the target already exists, it means we have a new, better version of it -- and we want to log that this is an overwrite
+            bool exists = await destBlob.ExistsAsync();
+            await destBlob.DeleteIfExistsAsync();
+            
+            int logId = await LogSubmitStartedAsync(new SubmittedBlob()
             {
                 Timestamp = DateTime.UtcNow,
                 UserName = sourceBlob.Metadata[mdUserName],
                 Path = sourceBlob.Metadata[mdSourceFile],
-                Length = sourceBlob.Properties.Length
+                Length = sourceBlob.Properties.Length,
+                IsOverwrite = exists
             });
 
             try
@@ -122,15 +128,15 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
                 await sourceBlob.DeleteAsync();
 
-                await LogProcessDoneAsync(logId, true);
+                await LogSubmitDoneAsync(logId, true);
             }
             catch (Exception exc)
             {
-                await LogProcessDoneAsync(logId, false, exc.Message);
+                await LogSubmitDoneAsync(logId, false, exc.Message);
             }
         }
 
-        public Task<IEnumerable<ProcessedBlob>> GetMyUploadHistoryAsync(string userName, int pageSize = 30, int page = 0)
+        public Task<IEnumerable<SubmittedBlob>> GetMyUploadHistoryAsync(string userName, int pageSize = 30, int page = 0)
         {
             throw new NotImplementedException();
         }

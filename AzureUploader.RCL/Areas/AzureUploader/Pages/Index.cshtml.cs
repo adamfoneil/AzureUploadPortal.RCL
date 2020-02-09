@@ -1,3 +1,4 @@
+using AzureUploader.RCL.Areas.AzureUploader.Models;
 using AzureUploader.RCL.Areas.AzureUploader.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,11 +17,12 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Pages
             _blobManager = blobManager;
         }
 
-        public IEnumerable<CloudBlockBlob> MyBlobs { get; set; }
+        public IEnumerable<CloudBlockBlob> MyUploads { get; set; }
+        public IEnumerable<SubmittedBlob> SubmittedBlobs { get; set; }
 
         public async Task OnGetAsync()
         {
-            MyBlobs = await _blobManager.GetMyBlobsAsync(User);
+            MyUploads = await _blobManager.GetMyBlobsAsync(User);
         }
 
         [HttpPost]
