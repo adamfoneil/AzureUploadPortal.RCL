@@ -62,12 +62,15 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
                 {
                     string blobName = GetBlobName(user, file);
                     var blob = container.GetBlockBlobReference(blobName);
-                    blob.Properties.ContentType = file.ContentType;
+                    blob.Properties.ContentType = file.ContentType;                    
+
+                    await blob.UploadFromStreamAsync(stream);
+
                     blob.Metadata.Add(mdUserName, GetUserFolderName(user));
                     blob.Metadata.Add(mdSourceFile, file.FileName);
                     blob.Metadata.Add("timestamp", DateTime.UtcNow.ToString());
+                    await blob.SetMetadataAsync();
 
-                    await blob.UploadFromStreamAsync(stream);
                     await OnBlobUploaded(user, blob);
                 }
             }
@@ -98,12 +101,13 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             if (!(await sourceBlob.ExistsAsync())) throw new Exception($"Source blob {blobUri} not found.");
 
             // where is it going? this depends on who uploaded it
-            string userName = sourceBlob.Metadata[mdUserName];
+            string userName = GetBlobUserName(sourceBlob);
             var container = await GetSubmittedContainerAsync(userName);
 
             // make sure we're not overwriting the source
-            string destName = sourceUri.LocalPath;            
+            string destName = sourceBlob.Name;            
             var destBlob = container.GetBlockBlobReference(destName);
+            destBlob.Properties.ContentType = sourceBlob.Properties.ContentType;
             if (sourceBlob.Uri.Equals(destBlob.Uri)) throw new InvalidOperationException("Source and destination blobs cannot be the same.");
 
             // if the target already exists, it means we have a new, better version of it -- and we want to log that this is an overwrite
@@ -113,8 +117,8 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             int logId = await LogSubmitStartedAsync(new SubmittedBlob()
             {
                 Timestamp = DateTime.UtcNow,
-                UserName = sourceBlob.Metadata[mdUserName],
-                Path = sourceBlob.Metadata[mdSourceFile],
+                UserName = userName,
+                Path = sourceBlob.Name,
                 Length = sourceBlob.Properties.Length,
                 IsOverwrite = exists
             });
@@ -136,7 +140,20 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             }
         }
 
-        public Task<IEnumerable<SubmittedBlob>> GetMyUploadHistoryAsync(string userName, int pageSize = 30, int page = 0)
+        private string GetBlobUserName(CloudBlockBlob blob)
+        {
+            try
+            {
+                return blob.Metadata[mdUserName];
+            }
+            catch
+            {
+                var nameParts = blob.Uri.LocalPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                return nameParts[1];
+            }
+        }
+
+        public Task<IEnumerable<SubmittedBlob>> GetMySubmittedBlobsAsync(IPrincipal user, int pageSize = 30, int page = 0)
         {
             throw new NotImplementedException();
         }

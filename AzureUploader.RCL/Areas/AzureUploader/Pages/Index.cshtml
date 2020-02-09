@@ -7,18 +7,32 @@
         integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
 }
 
-<p>My Uploads</p>
-
 <form class="dropzone" id="uploader" action="/AzureUploader/Index" method="post">
     @Html.AntiForgeryToken()
 </form>
 
+<h2>My Uploads</h2>
 <ul>
     @foreach (var item in Model.MyUploads)
     {
-        <li>@item.Name</li>
+        <li>
+            <span>@item.Name</span>
+            <form method="post" asp-page-handler="Submit" class="form-inline">
+                <input type="hidden" name="uri" value="@item.Uri.AbsoluteUri"/>
+                <button type="submit" class="btn btn-secondary btn-sm">Submit</button>
+            </form>
+        </li>
     }
 </ul>
+
+@if (Model.MyUploads.Any())
+{
+    <form method="post" asp-page-handler="SubmitAll" class="form-inline">
+        <button type="submit" class="btn btn-secondary btn-sm">Submit All</button>
+    </form>
+}
+
+<h2>Upload History</h2>
 
 
 @section Scripts {

@@ -53,5 +53,19 @@ namespace SampleApp.Services
                 return await cn.SaveAsync(submittedBlob);
             }
         }
+
+        /*
+        CREATE TABLE [dbo].[SubmittedBlob] (
+            [Id] int identity(1,1),
+            [Timestamp] datetime NOT NULL,
+            [UserName] nvarchar(50) NOT NULL,
+            [Path] nvarchar(255) NOT NULL,
+            [Length] bigint NOT NULL,
+            [IsOverwrite] bit NOT NULL,
+            [IsSuccessful] bit NOT NULL,
+            [ErrorMessage] nvarchar(max) NULL,
+            CONSTRAINT [PK_SubmittedBlob] PRIMARY KEY ([Id])
+        )
+        */
     }
 }
