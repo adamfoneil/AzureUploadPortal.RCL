@@ -22,7 +22,7 @@
     function start() {
       var myDropzone = Dropzone.forElement('#uploader');
       myDropzone.on('sending', function(file, xhr, formData) {
-        console.log('myDropzone sending', formData)
+        console.log('myDropzone sending', file, xhr, formData)
       });
     }
 
