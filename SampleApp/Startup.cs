@@ -12,6 +12,8 @@ using SampleApp.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AzureUploader.RCL.Areas.AzureUploader.Services;
+using SampleApp.Services;
 
 namespace SampleApp
 {
@@ -33,6 +35,8 @@ namespace SampleApp
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
+            services.AddControllers();
+            services.AddTransient(typeof(BlobManager), typeof(MyBlobManager));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,6 +65,7 @@ namespace SampleApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapDefaultControllerRoute();                
             });
         }
     }

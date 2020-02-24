@@ -1,16 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <PackageId>AO.AzureUploadPortal.RCL</PackageId>
+    <Authors>Adam O'Neil</Authors>
+    <Product>AO.AzureUploadPortal.RCL</Product>
+    <Description>Allow users to upload to Azure blob storage and track upload history with this Razor Class Library</Description>
+    <Copyright>Copyright (c) 2020 Adam O'Neil</Copyright>
+    <PackageProjectUrl>https://github.com/adamosoftware/AzureUploadPortal.RCL</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adamosoftware/AzureUploadPortal.RCL</RepositoryUrl>
+    <PackageTags>razor-class-library azure-blob-storage</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.2" />
+    <PackageReference Include="Humanizer" Version="2.7.9" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.3" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
 
 </Project>

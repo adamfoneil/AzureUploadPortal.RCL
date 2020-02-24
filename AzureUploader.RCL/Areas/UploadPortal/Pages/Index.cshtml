@@ -1,0 +1,52 @@
+﻿@page
+@model AzureUploader.RCL.Areas.AzureUploader.Pages.IndexModel
+@using Humanizer
+
+@section head {
+    <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" 
+        integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
+}
+
+<form class="dropzone" id="uploader" action="/UploadPortal/Index" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<h2>My Uploads</h2>
+<p>These files have been uploaded but not submitted.</p>
+<ul class="fileList">
+    @foreach (var item in Model.MyUploads)
+    {
+        <li class="fileItem">
+            <span class="fileName"><a href="@Model.GetDownloadUrl(item.Uri.AbsoluteUri)">@Model.TrimUserName(item.Name)</a></span>
+            <span class="text-muted small">@item.Properties.Length, @item.Properties.LastModified</span>
+        </li>
+    }
+</ul>
+
+@if (Model.MyUploads.Any())
+{
+    <form method="post" asp-page-handler="SubmitAll" class="form-inline">
+        <button type="submit" class="btn btn-secondary btn-sm">Submit All</button>
+    </form>
+}
+
+<hr/>
+
+<h2>Upload History</h2>
+<ul class="fileList">
+    @foreach (var item in Model.SubmittedBlobs)
+    {
+        <li class="fileItem">
+            <span class="fileName">@Model.TrimUserName(item.Path)</span>
+            <span>@item.LocalTime</span>
+        </li>
+    }
+</ul>
+
+@section Scripts {
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone-amd-module.min.js" 
+        integrity="sha256-resMHNTFeF3aRsPgzKyH1bIwSmB4dUlHGTE5nfldZLI=" crossorigin="anonymous"></script>
+    <!--implement Dropzone "sending" event to capture upload file full path-->
+}
