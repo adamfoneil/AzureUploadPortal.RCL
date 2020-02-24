@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sandbox</title>
+</head>
+<body>
+  <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" 
+          integrity="sha256-e47xOkXs1JXFbjjpoRr1/LhVcqSzRmGmPqsrUQeVs+g=" crossorigin="anonymous" />
+
+  <form class="dropzone" id="uploader" action="/UploadPortal/Index" method="post"></form>
+
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.js" integrity="sha256-OG/103wXh6XINV06JTPspzNgKNa/jnP1LjPP5Y3XQDY=" crossorigin="anonymous"></script>
+  <!--implement Dropzone "sending" event to capture upload file full path-->
+  <script>
+    function start() {
+      var myDropzone = Dropzone.forElement('#uploader');
+      myDropzone.on('sending', function(file, xhr, formData) {
+        console.log('myDropzone sending', file, xhr, formData)
+      });
+    }
+
+    setTimeout(start);
+  </script>
+</body>
+</html>
