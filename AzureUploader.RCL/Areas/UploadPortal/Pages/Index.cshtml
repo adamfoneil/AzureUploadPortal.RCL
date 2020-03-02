@@ -53,6 +53,8 @@
 
             myDropzone.on('sending', function(file, xhr, formData) {
                 console.log('myDropzone sending', file, xhr, formData)
+            }).on('init', function () {
+                this.hiddenFileInput.setAttribute("webkitdirectory", true);
             });
         }
 
