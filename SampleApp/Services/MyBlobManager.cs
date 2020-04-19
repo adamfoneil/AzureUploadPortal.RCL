@@ -2,15 +2,12 @@
 using AzureUploader.RCL.Areas.AzureUploader.Services;
 using Dapper.CX.Classes;
 using Dapper.CX.SqlServer.Extensions.Int;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using SampleApp.Queries;
 using System.Collections.Generic;
-using System.IO;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace SampleApp.Services
@@ -21,7 +18,7 @@ namespace SampleApp.Services
 
         public MyBlobManager(IConfiguration config) : base(new StorageCredentials(config["StorageAccount:Name"], config["StorageAccount:Key"]))
         {
-            _connectionString = config.GetConnectionString("DefaultConnection");
+            _connectionString = config.GetConnectionString("Default");
         }
 
         private SqlConnection GetConnection() => new SqlConnection(_connectionString);

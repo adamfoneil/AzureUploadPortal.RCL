@@ -4,13 +4,41 @@
     ViewData["Title"] = "Home page";
 }
 
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-
 <div class="text-center">
     <a href="/UploadPortal" class="btn btn-primary">My Uploads</a>
 </div>
 
+@if (User.Identity.IsAuthenticated)
+{
+    <form method="post" asp-page-handler="CreateDir">
+        <input type="text" class="form-control" name="Path" required="required"/>
+        <button class="btn btn-primary" type="submit">Create Dir</button>
+    </form>
+}
+
+@{ 
+    var dir = await Model.BlobManager.GetMyFoldersAsync(User);
+    renderFolder(dir);
+}
+
+@functions
+{
+    void renderFolder(FolderBuilder.Library.Models.Folder<string> folder)
+    {
+        <ul>
+            @foreach (var item in folder.Folders)
+            {
+                <li>
+                    @item.Name
+                    @if (item.Folders.Any())
+                    {
+                        <ul>
+                            @{ renderFolder(item); }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    
+}

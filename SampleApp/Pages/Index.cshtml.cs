@@ -1,25 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AzureUploader.RCL.Areas.AzureUploader.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
+using SampleApp.Services;
+using System.Threading.Tasks;
 
 namespace SampleApp.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
-
-        public IndexModel(ILogger<IndexModel> logger)
+        public IndexModel(BlobManager blobManager)
         {
-            _logger = logger;
+            BlobManager = blobManager;
         }
+
+        public BlobManager BlobManager { get; }
 
         public void OnGet()
         {
+        }
 
+        public async Task<RedirectResult> OnPostCreateDirAsync(string path)
+        {
+            await BlobManager.CreateFolderAsync(User, path);
+            return Redirect("/Index");
         }
     }
 }

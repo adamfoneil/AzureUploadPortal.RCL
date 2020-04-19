@@ -30,7 +30,7 @@ namespace SampleApp
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddControllers();
-            services.AddTransient(typeof(BlobManager), typeof(MyBlobManager));
+            services.AddTransient(typeof(BlobManager), (sp) => new MyBlobManager(Configuration));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

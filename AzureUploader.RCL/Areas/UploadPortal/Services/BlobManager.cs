@@ -1,4 +1,6 @@
 ﻿using AzureUploader.RCL.Areas.AzureUploader.Models;
+using FolderBuilder.Library;
+using FolderBuilder.Library.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Auth;
@@ -18,6 +20,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         private const string mdUserName = "userName";
         private const string mdSourceFile = "sourceFile";
+        private const string placeholderName = "dir.txt";
 
         public BlobManager(StorageCredentials storageCredentials)
         {
@@ -40,21 +43,11 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         protected abstract Task<IEnumerable<SubmittedBlob>> QuerySubmittedBlobsAsync(string userName, int pageSize = 30, int page = 0);
 
-        private string GetBlobName(IPrincipal user, IFormFile file, string path = null)
-        {
-            string[] parts = new string[]
-            {
-                GetUserFolderName(user),
-                path,
-                file.FileName
-            };
-
-            return Path.Combine(parts.Where(p => !string.IsNullOrEmpty(p)).ToArray());
-        }
+        private string GetBlobName(IPrincipal user, string fileName, string path = null) => Path.Combine(GetUserFolderName(user, path), fileName);
 
         protected virtual Task OnBlobUploaded(IPrincipal user, CloudBlockBlob blob) => Task.CompletedTask;
 
-        protected string GetUserFolderName(IPrincipal user) => (user.Identity.IsAuthenticated) ? user.Identity.Name : "anonUser";
+        protected string GetUserFolderName(IPrincipal user, string path = null) => Path.Combine(((user.Identity.IsAuthenticated) ? user.Identity.Name : "anonUser"), path ?? string.Empty);
 
         protected async Task<CloudBlobContainer> GetContainerInternalAsync(string containerName)
         {
@@ -65,6 +58,13 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             return container;
         }
 
+        public async Task CreateFolderAsync(IPrincipal user, string path)
+        {
+            var container = await GetContainerInternalAsync(UploadContainerName);
+            var placeholderBlob = container.GetBlockBlobReference(GetBlobName(user, placeholderName, path));
+            await placeholderBlob.UploadTextAsync("directory placeholder");            
+        }
+
         public async Task UploadAsync(HttpRequest request, IPrincipal user, string path = null)
         {
             var container = await GetContainerInternalAsync(UploadContainerName);
@@ -73,7 +73,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    string blobName = GetBlobName(user, file, path);
+                    string blobName = GetBlobName(user, file.FileName, path);
                     var blob = container.GetBlockBlobReference(blobName);
                     blob.Properties.ContentType = file.ContentType;                    
 
@@ -87,15 +87,22 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
                     await OnBlobUploaded(user, blob);
                 }
             }
+        }               
+
+        public async Task<Folder<string>> GetMyFoldersAsync(IPrincipal user)
+        {
+            var blobs = await GetMyBlobsAsync(user);
+            var blobNames = blobs.Select(b => b.Name);
+            return blobNames.ToFolderStructure(name => name);
         }
 
-        public async Task<IEnumerable<CloudBlockBlob>> GetMyBlobsAsync(IPrincipal user)
+        public async Task<IEnumerable<CloudBlockBlob>> GetMyBlobsAsync(IPrincipal user, string path = null)
         {
             var container = await GetContainerInternalAsync(UploadContainerName);
 
             List<CloudBlockBlob> results = new List<CloudBlockBlob>();
             var token = default(BlobContinuationToken);
-            var dir = container.GetDirectoryReference(GetUserFolderName(user));
+            var dir = container.GetDirectoryReference(GetUserFolderName(user, path));
             do
             {
                 var segment = await dir.ListBlobsSegmentedAsync(true, BlobListingDetails.All, null, token, null, null);
