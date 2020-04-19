@@ -30,12 +30,6 @@ namespace SampleApp.Services
 
         protected override Task<CloudBlobContainer> GetSubmittedContainerAsync(string userName) => GetContainerInternalAsync("submitted");
         
-        protected override string GetBlobName(IPrincipal user, IFormFile file)
-        {
-            string userName = GetUserFolderName(user);
-            return Path.Combine(userName, file.FileName);
-        }
-
         protected override async Task LogSubmitDoneAsync(int id, bool successful, string message = null)
         {
             using (var cn = GetConnection())

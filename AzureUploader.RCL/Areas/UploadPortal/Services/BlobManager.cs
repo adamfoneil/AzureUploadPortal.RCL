@@ -5,6 +5,7 @@ using Microsoft.Azure.Storage.Auth;
 using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -39,7 +40,17 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
 
         protected abstract Task<IEnumerable<SubmittedBlob>> QuerySubmittedBlobsAsync(string userName, int pageSize = 30, int page = 0);
 
-        protected virtual string GetBlobName(IPrincipal user, IFormFile file) => file.FileName;
+        private string GetBlobName(IPrincipal user, IFormFile file, string path = null)
+        {
+            string[] parts = new string[]
+            {
+                GetUserFolderName(user),
+                path,
+                file.FileName
+            };
+
+            return Path.Combine(parts.Where(p => !string.IsNullOrEmpty(p)).ToArray());
+        }
 
         protected virtual Task OnBlobUploaded(IPrincipal user, CloudBlockBlob blob) => Task.CompletedTask;
 
@@ -54,7 +65,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             return container;
         }
 
-        public async Task UploadAsync(HttpRequest request, IPrincipal user)
+        public async Task UploadAsync(HttpRequest request, IPrincipal user, string path = null)
         {
             var container = await GetContainerInternalAsync(UploadContainerName);
 
@@ -62,7 +73,7 @@ namespace AzureUploader.RCL.Areas.AzureUploader.Services
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    string blobName = GetBlobName(user, file);
+                    string blobName = GetBlobName(user, file, path);
                     var blob = container.GetBlockBlobReference(blobName);
                     blob.Properties.ContentType = file.ContentType;                    
 
